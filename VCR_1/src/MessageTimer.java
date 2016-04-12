@@ -23,21 +23,24 @@ public class MessageTimer extends TimerTask{
      public User sender;
     
     private static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
-    private static final String DB_URL = "jdbc:mysql://192.168.0.100:3306/vcr";
+    private static final String DB_URL = "jdbc:mysql://192.168.0.101:3306/vcr";
     
     private static final String USER = "root";
-    private static final String PASS = "";
+    private static final String PASS = "root";
     
     private javax.swing.JList<String> jList1;
     private String time;
-    MessageTimer(javax.swing.JList<String> jList,String time1){
+    private javax.swing.JScrollPane jScrollPane1;
+    
+    MessageTimer(javax.swing.JList<String> jList,String time1, javax.swing.JScrollPane jScrollPane){
         jList1 = jList;
         time = time1;
+        jScrollPane1 = jScrollPane;
     }
     public void run(){
         Connection conn = null;
         Statement stmt = null;
-        String[] msg;
+//        String[] msg;
         try
         {
                
@@ -64,7 +67,15 @@ public class MessageTimer extends TimerTask{
                    model.addElement(rs.getString("sender") + ": " + rs.getString("text"));
                    System.out.println(rs.getString("text"));
                    time = rs.getString("timestamp");
-                   jList1 = new JList(model);                   
+                   jList1 = new JList(model);
+                   javax.swing.SwingUtilities.invokeLater(new Runnable() {
+                        public void run() { 
+                            int lastIndex = jList1.getModel().getSize() - 1;
+                            jScrollPane1.getVerticalScrollBar().setValue(lastIndex*100);
+                        }
+                     });
+                   
+//                    }
                }
                
                

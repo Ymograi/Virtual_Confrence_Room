@@ -26,17 +26,17 @@ public class ShowMessage extends javax.swing.JFrame {
      * Creates new form ShowMessage
      */
      private static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
-    private static final String DB_URL = "jdbc:mysql://192.168.0.100:3306/vcr";
+    private static final String DB_URL = "jdbc:mysql://192.168.0.101:3306/vcr";
     
     private static final String USER = "root";
-    private static final String PASS = "";
+    private static final String PASS = "root";
     
     Connection conn=null;
     Statement stmt = null;
     
    //PutNotice home = new PutNotice();
     
-    private static User user=new User("YASH");
+    private static User user=new User("Abin");
     public ShowMessage() {
         initComponents();
     }
@@ -54,6 +54,7 @@ public class ShowMessage extends javax.swing.JFrame {
         jList1 = new javax.swing.JList<>();
         jTextField1 = new javax.swing.JTextField();
         jButton1 = new javax.swing.JButton();
+        jLabel1 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -69,6 +70,11 @@ public class ShowMessage extends javax.swing.JFrame {
                 jTextField1ActionPerformed(evt);
             }
         });
+        jTextField1.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                jTextField1KeyPressed(evt);
+            }
+        });
 
         jButton1.setText("send");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
@@ -77,6 +83,8 @@ public class ShowMessage extends javax.swing.JFrame {
             }
         });
 
+        jLabel1.setText("160 characters left");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -84,12 +92,14 @@ public class ShowMessage extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addGap(20, 20, 20)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 355, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 287, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 287, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jTextField1))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton1))
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 355, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(25, Short.MAX_VALUE))
+                        .addComponent(jButton1)))
+                .addGap(25, 25, 25))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -100,7 +110,9 @@ public class ShowMessage extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jTextField1)
                     .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, 42, Short.MAX_VALUE))
-                .addContainerGap(28, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel1)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -113,13 +125,21 @@ public class ShowMessage extends javax.swing.JFrame {
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
         try{
+//                jLabel1.setText("160 characters only");
                 Class.forName("com.mysql.jdbc.Driver");
                conn = DriverManager.getConnection(DB_URL,USER,PASS);
                String message = jTextField1.getText();
+               if(message.length()>160){
+                   message = message.substring(0, 159);
+//                   System.out.println(message);
+                   jLabel1.setText("Limit exceeded. First 160 characters considered.");
+               }
+               jTextField1.setText("");
                stmt = conn.createStatement();
                String sql;
                sql = "insert into message (sender,text) values (\"" + user.getUsername() + "\",\"" + message + "\")";
                stmt.executeUpdate(sql);
+               jLabel1.setText("160 characters left");
             }
             catch (SQLException e)
             {
@@ -129,6 +149,53 @@ public class ShowMessage extends javax.swing.JFrame {
          }
         
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jTextField1KeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jTextField1KeyPressed
+        // TODO add your handling code here:
+        char ch = evt.getKeyChar();
+        if(ch == '\n'){
+            try{
+//                jLabel1.setText("160 characters only");
+                Class.forName("com.mysql.jdbc.Driver");
+               conn = DriverManager.getConnection(DB_URL,USER,PASS);
+               String message = jTextField1.getText();
+//               System.out.println("Message is " + message);
+               if(message.length()>=160){
+                   message = message.substring(0, 159);
+//                   System.out.println(message);
+                   jLabel1.setText("Limit exceeded. First 160 characters considered.");
+               }
+//               System.out.println(message.length());
+               jTextField1.setText("");
+               stmt = conn.createStatement();
+               String sql;
+               sql = "insert into message (sender,text) values (\"" + user.getUsername() + "\",\"" + message + "\")";
+               stmt.executeUpdate(sql);
+            }
+            catch (SQLException e)
+            {
+                System.out.print(e.getMessage());
+            } 
+            catch (ClassNotFoundException ex) {
+             Logger.getLogger(PutNotice.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            jLabel1.setText("160 characters left");
+        }
+        else
+        {
+        //jLabel1.setText("160 characters only");
+        String message1 = ch + jTextField1.getText();
+        System.out.println(message1);
+        if(160 - message1.length() >= 0)
+            jLabel1.setText((160 - message1.length()) + " characters left.");
+        
+        else
+            jLabel1.setText(message1.length() - 160 + " characters extra. Will be truncated.");
+        }
+        
+        
+        
+    }//GEN-LAST:event_jTextField1KeyPressed
 
     /**
      * @param args the command line arguments
@@ -232,7 +299,7 @@ public class ShowMessage extends javax.swing.JFrame {
                 showmessage.jList1.setModel(new DefaultListModel());
 //                showmessage.receive();
                     Timer timer = new Timer();
-                    MessageTimer mt = new MessageTimer(showmessage.jList1,"1993-01-17 17:15:00");
+                    MessageTimer mt = new MessageTimer(showmessage.jList1,"1993-01-17 17:15:00",showmessage.jScrollPane1);
                     timer.schedule(mt,0,500);
                     
                     }
@@ -249,6 +316,7 @@ public class ShowMessage extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JList<String> jList1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextField jTextField1;
