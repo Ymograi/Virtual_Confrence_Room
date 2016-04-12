@@ -29,10 +29,10 @@ public class User {
     public String name;
     public String email;
     private static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
-    private static final String DB_URL = "jdbc:mysql://192.168.0.100:3306/vcr";
+    private static final String DB_URL = "jdbc:mysql://192.168.0.101:3306/vcr";
     
     private static final String USER = "root";
-    private static final String PASS = "";
+    private static final String PASS = "root";
     Connection conn= null;
     Statement stmt= null;
     User(String usernam){
